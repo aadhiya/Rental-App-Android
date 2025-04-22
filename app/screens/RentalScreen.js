@@ -143,7 +143,7 @@ const RentalScreen = ({ route, navigation }) => {
         await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
       }
 
-      Alert.alert('Success', 'Photo saved to RentalPhotos album.');
+      Alert.alert('Success', `Photo saved as ${generateFileName()} to RentalPhotos album.`);
     } catch (e) {
       console.error('Save error:', e);
       Alert.alert('Error', 'Failed to save photo.');
@@ -240,3 +240,4 @@ const styles = StyleSheet.create({
 });
 
 export default RentalScreen;
+
