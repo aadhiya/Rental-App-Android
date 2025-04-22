@@ -6,24 +6,24 @@ import {
   FlatList,
   TouchableOpacity,
   Platform,
-  Button,
-  Image
+  Image,
+  ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
-import { db } from '@/app/services/firebaseConfig.js';
-import * as FileSystem from 'expo-file-system';
+import { db } from '@/app/services/firebaseConfig';
 import * as MediaLibrary from 'expo-media-library';
-import * as XLSX from 'xlsx';
 import Toast from 'react-native-toast-message';
 
 const ReportScreen = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [rents, setRents] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
     fetchRents();
+    loadPhotos();
   }, [startDate]);
 
   const fetchRents = async () => {
@@ -45,40 +45,34 @@ const ReportScreen = () => {
     }
   };
 
-  const downloadExcel = async () => {
-    try {
-      const ws = XLSX.utils.json_to_sheet(rents);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Rents');
-      const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
-      const cacheFilePath = `${FileSystem.cacheDirectory}rents_report.xlsx`;
-      await FileSystem.writeAsStringAsync(cacheFilePath, wbout, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      if (Platform.OS === 'android') {
-        const { status } = await MediaLibrary.requestPermissionsAsync();
-        if (status !== 'granted') {
-          throw new Error('Permission to access media library is required.');
-        }
-      }
-
-      const downloadsDir = `${FileSystem.documentDirectory}Download/rents_report.xlsx`;
-      await FileSystem.moveAsync({ from: cacheFilePath, to: downloadsDir });
-
-      Toast.show({
-        type: 'success',
-        text1: 'File Saved',
-        text2: `Excel file saved to Downloads directory.`,
-      });
-    } catch (error) {
-      console.error('Error generating Excel:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: `Could not save file: ${error.message}`,
-      });
+  const loadPhotos = async () => {
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    if (status !== 'granted') {
+      console.log("No permission for media library");
+      return;
     }
+
+    const album = await MediaLibrary.getAlbumAsync("RentalPhotos");
+    if (album) {
+      const { assets } = await MediaLibrary.getAssetsAsync({
+        album: album.id,
+        mediaType: 'photo',
+        first: 100,
+        sortBy: [['creationTime', false]],
+      });
+      setPhotos(assets);
+    }
+  };
+
+  const generateExpectedFilename = (itemName, createdAt) => {
+    const safeName = itemName?.toLowerCase().replace(/\s+/g, "").replace(/'/g, "");
+    const date = createdAt?.toDate().toISOString().slice(0, 10).replace(/-/g, "");
+    return `rental_${safeName}_${date}.jpg`;
+  };
+
+  const findPhotoUri = (expectedName) => {
+    const match = photos.find((p) => p.filename === expectedName);
+    return match?.uri;
   };
 
   const handleDateChange = (event, selectedDate) => {
@@ -86,26 +80,26 @@ const ReportScreen = () => {
     if (selectedDate) setStartDate(selectedDate);
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.cardText}>
-        <Text style={styles.name}>{item.name || 'No Name'}</Text>
-        <Text style={styles.details}>Item: {item.itemName}</Text>
-        <Text style={styles.details}>Qty: {item.quantity}</Text>
-        <Text style={styles.details}>Date: {item.createdAt?.toDate().toLocaleDateString()}</Text>
+  const renderItem = ({ item }) => {
+    const expectedFileName = generateExpectedFilename(item.itemName, item.createdAt);
+    const imageUri = findPhotoUri(expectedFileName);
+
+    return (
+      <View style={styles.rentalBlock}>
+        <Text style={styles.rentalText}>👤 {item.name}</Text>
+        <Text style={styles.rentalText}>📦 {item.itemName} x {item.quantity}</Text>
+        <Text style={styles.rentalText}>📅 {item.createdAt?.toDate().toLocaleDateString()}</Text>
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.image} />
+        ) : (
+          <Text style={styles.noImage}>No Photo Found</Text>
+        )}
       </View>
-      {item.photoPath && (
-        <Image
-          source={{ uri: item.photoPath }}
-          style={styles.image}
-          resizeMode="cover"
-        />
-      )}
-    </View>
-  );
+    );
+  };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Rental Report</Text>
 
       <Text style={styles.label}>Start Date:</Text>
@@ -122,45 +116,74 @@ const ReportScreen = () => {
         />
       )}
 
-      <FlatList
-        data={rents}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        ListEmptyComponent={<Text style={styles.noDataText}>No rental data available.</Text>}
-      />
-
-      <TouchableOpacity style={styles.downloadButton} onPress={downloadExcel}>
-        <Text style={styles.buttonText}>Download as Excel</Text>
-      </TouchableOpacity>
-
+      <Text style={styles.label}>Rental Data:</Text>
+      {rents.length === 0 ? (
+        <Text style={styles.noDataText}>No rental data available for the selected date.</Text>
+      ) : (
+        <FlatList
+          data={rents}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          scrollEnabled={false}
+        />
+      )}
       <Toast />
-    </View>
+    </ScrollView>
   );
 };
 
 export default ReportScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
-  label: { fontSize: 16, marginVertical: 10 },
+  container: {
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  rentalBlock: {
+    marginBottom: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#ccc',
+    backgroundColor: '#f9f9f9',
+  },
+  rentalText: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  label: {
+    fontSize: 16,
+    marginVertical: 10,
+  },
+  noImage: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 10,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    marginTop: 10,
+    borderRadius: 8,
+  },
+  noDataText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    color: '#999',
+  },
   datePicker: {
-    padding: 10, borderWidth: 1, borderRadius: 5,
-    borderColor: '#ccc', marginBottom: 20, alignItems: 'center',
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: '#ccc',
+    marginBottom: 20,
+    alignItems: 'center',
   },
-  noDataText: { textAlign: 'center', marginTop: 20, fontSize: 16, color: '#999' },
-  downloadButton: {
-    backgroundColor: '#007BFF', padding: 15,
-    borderRadius: 5, marginTop: 20,
-  },
-  buttonText: { color: 'white', fontSize: 16, textAlign: 'center' },
-  card: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    padding: 15, borderWidth: 1, borderColor: '#ddd',
-    borderRadius: 8, marginBottom: 12, alignItems: 'center',
-  },
-  cardText: { flex: 1, marginRight: 10 },
-  name: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-  details: { fontSize: 14, color: '#555' },
-  image: { width: 80, height: 80, borderRadius: 6 },
 });
