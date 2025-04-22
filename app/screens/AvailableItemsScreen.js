@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { db } from './app/services/firebaseConfig.js';
+import { db } from '@/app/services/firebaseConfig.js';
 import { collection, getDocs } from 'firebase/firestore';
 import Toast from 'react-native-toast-message';
 
@@ -49,7 +49,7 @@ const AvailableItemsScreen = ({ navigation }) => {
             }}
           >
             <Text style={styles.itemName}>{material.name}</Text>
-            <Text style={styles.itemRate}>{`Rate per day: $${material.rate}`}</Text>
+            <Text style={styles.itemRate}>{`Rate per day: ₹${material.rate}`}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

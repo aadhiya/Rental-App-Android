@@ -28,15 +28,37 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.buttonText}>View Report</Text>
       </TouchableOpacity>
 
-      {/* Button to navigate to Upload Materials Screen */}
+      {/* Button to navigate to Stock Management Screen */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('Upload Materials')}
-        style={[styles.button, styles.secondaryButton]}
+        onPress={() => navigation.navigate('Stock Management')}
+        style={[styles.button, styles.tertiaryButton]}
         activeOpacity={0.8}
-        accessibilityLabel="Upload new materials to the inventory"
+        accessibilityLabel="Manage and view stock details"
         accessibilityRole="button"
       >
-        <Text style={styles.buttonText}>Upload Materials</Text>
+        <Text style={styles.buttonText}>Manage Stock</Text>
+      </TouchableOpacity>
+
+      {/* Button to navigate to Bill Generation Screen */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Generate Bill')}
+        style={[styles.button, styles.secondaryButton]}
+        activeOpacity={0.8}
+        accessibilityLabel="Generate a bill and send to the customer"
+        accessibilityRole="button"
+      >
+        <Text style={styles.buttonText}>Generate Bill</Text>
+      </TouchableOpacity>
+
+      {/* 🔥 New Button to Capture Customer Photo */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('CustomerPhoto')}
+        style={[styles.button, styles.captureButton]}
+        activeOpacity={0.8}
+        accessibilityLabel="Capture customer photo using camera"
+        accessibilityRole="button"
+      >
+        <Text style={styles.buttonText}>Capture Customer Photo</Text>
       </TouchableOpacity>
     </View>
   );
@@ -49,7 +71,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f8f9fa',
-    justifyContent: 'center', // Center items vertically
+    justifyContent: 'center',
   },
   header: {
     fontSize: 24,
@@ -66,7 +88,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   secondaryButton: {
+    backgroundColor: '#FFC107',
+  },
+  tertiaryButton: {
     backgroundColor: '#28A745',
+  },
+  captureButton: {
+    backgroundColor: '#6F42C1', // Distinct purple for camera feature
   },
   buttonText: {
     color: '#FFFFFF',

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { db } from './app/services/firebaseConfig.js';
+import { db } from '@/app/services/firebaseConfig.js';
 import { collection, addDoc } from 'firebase/firestore';
 import Toast from 'react-native-toast-message';
 

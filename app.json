@@ -8,6 +8,12 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/3d67d129-0830-4b80-8e81-0a2b6ebbbc0a"
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -17,6 +23,8 @@
         "backgroundColor": "#ffffff"
       },
       "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "MANAGE_EXTERNAL_STORAGE"
@@ -28,7 +36,7 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "entryPoint": "./index.js",
+    "entryPoint": "./app/tabs/index.js",
     "plugins": [
       [
         "expo-splash-screen",
@@ -37,6 +45,13 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow the app to access your camera.",
+          "microphonePermission": "Allow the app to record audio."
         }
       ]
     ],
@@ -47,6 +62,9 @@
       "eas": {
         "projectId": "3d67d129-0830-4b80-8e81-0a2b6ebbbc0a"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }
