@@ -11,7 +11,8 @@ import {
   Platform,
   TouchableOpacity,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-toast-message';
@@ -31,6 +32,7 @@ const RentalScreen = ({ route, navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [cameraType, setCameraType] = useState('back');
+  const [showCamera, setShowCamera] = useState(false);
   const cameraRef = useRef(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
@@ -173,7 +175,7 @@ const RentalScreen = ({ route, navigation }) => {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View>
+        <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
           <Text style={styles.header}>Rent Item</Text>
 
           <Text style={styles.itemDetail}><Text style={styles.bold}>Item:</Text> {item.name}</Text>
@@ -200,13 +202,23 @@ const RentalScreen = ({ route, navigation }) => {
             <Button title="Confirm Rental" onPress={handleConfirmRental} color="#2196F3" />
           </View>
 
-          <View style={{ marginTop: 20 }}>
-            <CameraView style={{ height: 300 }} facing={cameraType} ref={cameraRef} onCameraReady={() => setIsCameraReady(true)} />
-            <TouchableOpacity onPress={savePhoto} disabled={loading} style={styles.captureButton}>
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Capture & Save Photo</Text>}
-            </TouchableOpacity>
+          <View style={{ marginTop: 30 }}>
+            <Button title="Capture Customer Photo" onPress={() => setShowCamera(!showCamera)} />
+            {showCamera && (
+              <>
+                <CameraView
+                  style={{ height: 300, marginTop: 10 }}
+                  facing={cameraType}
+                  ref={cameraRef}
+                  onCameraReady={() => setIsCameraReady(true)}
+                />
+                <TouchableOpacity onPress={savePhoto} disabled={loading} style={styles.captureButton}>
+                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Capture & Save Photo</Text>}
+                </TouchableOpacity>
+              </>
+            )}
           </View>
-        </View>
+        </ScrollView>
       </TouchableWithoutFeedback>
       <Toast />
     </KeyboardAvoidingView>
