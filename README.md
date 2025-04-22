@@ -1,50 +1,76 @@
-# Welcome to your Expo app 👋
+# 📦 Rental App (Android)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A simple and powerful **Android Rental Management App** designed to help small businesses or individuals manage rental items, track stock, generate bills, and capture customer proof using the device camera. Built with **React Native**, **Firebase**, and **Expo SDK 2025**.
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Features
 
-   ```bash
-   npm install
-   ```
+- 📦 Manage stock and item availability  
+- 👤 Add customer rental info with name and phone number  
+- 📅 Set rental start and end dates  
+- 💰 Auto-calculate rental charges  
+- 🧾 Generate and preview a bill  
+- 📸 Capture and save proof-of-rental images locally  
+- 📁 Save photos by item name and rental date in `RentalPhotos` album  
+- 📊 View rental reports filtered by date  
+- 📤 Export reports to Excel format  
+- 🔐 Proprietary license (see below)
 
-2. Start the app
+---
 
-   ```bash
+## 🛠 Tech Stack
+
+- **React Native** with Expo  
+- **Firebase Firestore** – for storing rental records and materials  
+- **Expo MediaLibrary** – for saving images locally  
+- **XLSX** – for report export to Excel  
+- **Toast Messages** – for user feedback
+
+---
+
+## 📝 Setup Instructions
+
+1. Clone this repo:
+    ```bash
+    git clone https://github.com/aadhiya/Rental-App-Android.git
+    cd Rental-App-Android
+    ```
+
+2. Install dependencies:
+    ```bash
+    npm install
+    ```
+
+3. Start the app in development mode:
+    ```bash
     npx expo start
-   ```
+    ```
 
-In the output, you'll find options to open the app in a
+> Make sure to set up your `firebaseConfig.js` file with your Firebase credentials.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🔒 License
 
-## Get a fresh project
+[![Proprietary License](https://img.shields.io/badge/license-Proprietary-red.svg)](#license)
 
-When you're ready, run:
+This project is **not open-source**. All code and assets are **proprietary** and owned by the author.  
+No part of this repository may be copied, reused, or modified without **explicit written permission**.
 
-```bash
-npm run reset-project
-```
+© 2025 Aadhiya Maria – All rights reserved.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+This app demonstrates:
+- Full-stack mobile development using Firebase backend  
+- MediaLibrary photo capture and custom storage path  
+- Report generation and file handling  
+- Modular and scalable code structure  
+- Real-world usability (proof-of-rental, Excel export, UI validation)
 
-## Join the community
+Feel free to check the commit history for clean, structured updates. ⭐
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
