@@ -10,7 +10,8 @@ import ReportScreen from '@/app/screens/ReportScreen';
 import StockManagementScreen from '@/app/screens/StockManagementScreen';
 import BillGenerationScreen from '@/app/screens/BillGenerationScreen'; // Import the new screen
 import CustomerPhotoScreen from '@/app/screens/CustomerPhotoScreen';
-
+import RentsScreen from '@/app/screens/RentsScreen'; // Import your new screen
+import RentalBatchScreen from '@/app/screens/RentalBatchScreen';
 
 
 const Stack = createStackNavigator();
@@ -28,6 +29,13 @@ export default function App() {
           <Stack.Screen name="Upload Materials" component={ManageMaterialsScreen} />
           <Stack.Screen name="Stock Management" component={StockManagementScreen} />
           <Stack.Screen name="CustomerPhoto" component={CustomerPhotoScreen} />
+           <Stack.Screen name="Rents" component={RentsScreen} /> 
+           {/* Add the RentalBatchScreen here */}
+          <Stack.Screen
+            name="RentalBatch"
+            component={RentalBatchScreen}
+            options={{ title: 'Batch Rental Details' }}
+          />
           <Stack.Screen
             name="Generate Bill"
             component={BillGenerationScreen} // Add the new screen

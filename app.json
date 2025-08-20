@@ -36,7 +36,6 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "entryPoint": "./app/tabs/index.js",
     "plugins": [
       [
         "expo-splash-screen",
@@ -53,7 +52,8 @@
           "cameraPermission": "Allow the app to access your camera.",
           "microphonePermission": "Allow the app to record audio."
         }
-      ]
+      ],
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true

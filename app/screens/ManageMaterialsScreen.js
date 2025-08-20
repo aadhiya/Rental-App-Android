@@ -12,7 +12,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { db } from '@/app/services/firebaseConfig.js';
-import { collection, addDoc, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore';
 import Toast from 'react-native-toast-message';
 
 const ManageMaterialsScreen = () => {
@@ -21,6 +21,8 @@ const ManageMaterialsScreen = () => {
   const [materialRate, setMaterialRate] = useState('');
   const [selectedMaterialId, setSelectedMaterialId] = useState(null);
   const [quantity, setQuantity] = useState('');
+
+  const [searchQuery, setSearchQuery] = useState(''); // ✅ NEW state for search
 
   // Fetch materials from Firestore
   const fetchMaterials = async () => {
@@ -47,14 +49,17 @@ const ManageMaterialsScreen = () => {
       Toast.show({ type: 'error', text1: 'Error', text2: 'Both material name and rate are required.' });
       return;
     }
-
     try {
       const materialsCollection = collection(db, 'materials');
-      await addDoc(materialsCollection, { name: materialName, rate: parseFloat(materialRate), quantity: 0 });
+      await addDoc(materialsCollection, {
+        name: materialName,
+        rate: parseFloat(materialRate),
+        quantity: 0,
+      });
       Toast.show({ type: 'success', text1: 'Success', text2: `Material "${materialName}" added successfully!` });
       setMaterialName('');
       setMaterialRate('');
-      fetchMaterials(); // Refresh the list
+      fetchMaterials();
     } catch (error) {
       console.error('Error adding material:', error);
       Toast.show({ type: 'error', text1: 'Error', text2: `Failed to add material. ${error.message}` });
@@ -67,25 +72,37 @@ const ManageMaterialsScreen = () => {
       Toast.show({ type: 'error', text1: 'Error', text2: 'Quantity is required.' });
       return;
     }
-
     try {
       const materialRef = doc(db, 'materials', materialId);
       await updateDoc(materialRef, { quantity: parseInt(quantity, 10) });
       Toast.show({ type: 'success', text1: 'Success', text2: 'Quantity updated successfully!' });
       setSelectedMaterialId(null);
       setQuantity('');
-      fetchMaterials(); // Refresh the list
+      fetchMaterials();
     } catch (error) {
       console.error('Error updating quantity:', error);
       Toast.show({ type: 'error', text1: 'Error', text2: `Failed to update quantity. ${error.message}` });
     }
   };
 
+  // ✅ Filtered list based on search
+  const filteredMaterials = materials.filter(m =>
+    m.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding">
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.header}>Manage Materials</Text>
+
+          {/* Search Bar */}
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Search materials..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
 
           {/* Material Name Input */}
           <TextInput
@@ -98,44 +115,40 @@ const ManageMaterialsScreen = () => {
           {/* Material Rate Input */}
           <TextInput
             style={styles.input}
-            placeholder="Material Rate"
+            placeholder="Rate"
+            keyboardType="numeric"
             value={materialRate}
             onChangeText={setMaterialRate}
-            keyboardType="numeric"
           />
 
           {/* Add Material Button */}
-          <Button title="Add Material" onPress={addMaterial} color="#27ae60" />
+          <Button title="Add Material" onPress={addMaterial} />
 
+          {/* List Header */}
           <Text style={styles.sectionHeader}>Materials List</Text>
 
           {/* Materials List */}
           <FlatList
-            data={materials}
+            data={filteredMaterials} // ✅ use filtered list
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <View style={styles.materialItem}>
                 <TouchableOpacity onPress={() => setSelectedMaterialId(item.id)}>
                   <Text style={styles.materialName}>{item.name}</Text>
-                  <Text>Rate: ${item.rate}</Text>
+                  <Text>Rate: ₹{item.rate}</Text>
                   <Text>Quantity: {item.quantity || 0}</Text>
                 </TouchableOpacity>
 
-                {/* Show Input and Update Button for Selected Material */}
                 {selectedMaterialId === item.id && (
                   <View style={styles.updateContainer}>
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter Quantity"
+                      placeholder="Enter new quantity"
+                      keyboardType="numeric"
                       value={quantity}
                       onChangeText={setQuantity}
-                      keyboardType="numeric"
                     />
-                    <Button
-                      title="Update Quantity"
-                      onPress={() => updateMaterialQuantity(item.id)}
-                      color="#f39c12"
-                    />
+                    <Button title="Update Quantity" color="#f39c12" onPress={() => updateMaterialQuantity(item.id)} />
                   </View>
                 )}
               </View>
@@ -143,7 +156,6 @@ const ManageMaterialsScreen = () => {
           />
         </View>
       </TouchableWithoutFeedback>
-      <Toast />
     </KeyboardAvoidingView>
   );
 };
@@ -159,20 +171,30 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 10,
     textAlign: 'center',
+  },
+  searchBar: {
+    height: 45,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 15,
+    backgroundColor: '#f9f9f9',
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   sectionHeader: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 20,
+    marginTop: 15,
+    marginBottom: 5,
   },
   materialItem: {
     padding: 10,

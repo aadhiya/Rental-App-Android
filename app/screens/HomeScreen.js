@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-
+import TodayDueNotification from '@/components/TodayDueNotification';
 const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
@@ -16,8 +16,16 @@ const HomeScreen = ({ navigation }) => {
       >
         <Text style={styles.buttonText}>View Available Items</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('Rents')} // Match screen name added in Stack.Navigator
+        accessibilityLabel="View the list of rents and their status"
+        accessibilityRole="button"
+      >
+        <Text style={styles.buttonText}>Rents Status</Text>
+      </TouchableOpacity>
 
-      {/* Button to navigate to Rent Item Screen */}
+      {/* Button to navigate to Rent Item Screen*/}
       <TouchableOpacity
         onPress={() => navigation.navigate('Report')}
         style={styles.button}
@@ -27,7 +35,7 @@ const HomeScreen = ({ navigation }) => {
       >
         <Text style={styles.buttonText}>View Report</Text>
       </TouchableOpacity>
-
+ 
       {/* Button to navigate to Stock Management Screen */}
       <TouchableOpacity
         onPress={() => navigation.navigate('Stock Management')}
@@ -39,7 +47,7 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.buttonText}>Manage Stock</Text>
       </TouchableOpacity>
 
-      {/* Button to navigate to Bill Generation Screen */}
+      {/* Button to navigate to Bill Generation Screen 
       <TouchableOpacity
         onPress={() => navigation.navigate('Generate Bill')}
         style={[styles.button, styles.secondaryButton]}
@@ -49,8 +57,8 @@ const HomeScreen = ({ navigation }) => {
       >
         <Text style={styles.buttonText}>Generate Bill</Text>
       </TouchableOpacity>
-
-      {/* 🔥 New Button to Capture Customer Photo */}
+*/}
+      {/* 🔥 New Button to Capture Customer Photo
       <TouchableOpacity
         onPress={() => navigation.navigate('CustomerPhoto')}
         style={[styles.button, styles.captureButton]}
@@ -60,6 +68,7 @@ const HomeScreen = ({ navigation }) => {
       >
         <Text style={styles.buttonText}>Capture Customer Photo</Text>
       </TouchableOpacity>
+       */}
     </View>
   );
 };

@@ -17,6 +17,7 @@ import Toast from 'react-native-toast-message';
 const StockManagementScreen = () => {
   const [materials, setMaterials] = useState([]);
   const [newMaterial, setNewMaterial] = useState({ name: '', rate: '', quantity: '' });
+  const [searchQuery, setSearchQuery] = useState(''); // ✅ new state
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
@@ -42,7 +43,6 @@ const StockManagementScreen = () => {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
-
     try {
       const materialDoc = {
         name: newMaterial.name,
@@ -85,13 +85,26 @@ const StockManagementScreen = () => {
     setSelectedMaterial(null);
   };
 
+  // ✅ filter materials before showing
+  const filteredMaterials = materials.filter((m) =>
+    m.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Stock Management</Text>
 
+      {/* ✅ Search Bar */}
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Search materials..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+
       {/* Add New Material Button */}
       {!showAddForm && (
-        <Button title="Add New Item" onPress={() => setShowAddForm(true)} />
+        <Button title="Add New Material" onPress={() => setShowAddForm(true)} />
       )}
 
       {/* Add Material Form */}
@@ -118,19 +131,19 @@ const StockManagementScreen = () => {
             value={newMaterial.quantity}
             onChangeText={(text) => setNewMaterial({ ...newMaterial, quantity: text })}
           />
-          <Button title="Add Material" onPress={addMaterial} />
+          <Button title="Save Material" onPress={addMaterial} />
         </View>
       )}
 
-      {/* Existing Materials List */}
+      {/* Material List */}
       <FlatList
-        data={materials}
+        data={filteredMaterials} // ✅ use filtered list
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.materialName}>{item.name}</Text>
             <View style={styles.infoContainer}>
-              <Text style={styles.infoText}>Rate: ${item.rate}</Text>
+              <Text style={styles.infoText}>Rate: ₹{item.rate}</Text>
               <Text style={styles.infoText}>Quantity: {item.quantity}</Text>
             </View>
             <TouchableOpacity
@@ -148,22 +161,16 @@ const StockManagementScreen = () => {
 
       {/* Update Material Modal */}
       {showEditModal && (
-        <Modal
-          animationType="slide"
-          transparent={false} // Solid white background
-          visible={showEditModal}
-          onRequestClose={() => {
-            setShowEditModal(false);
-            setSelectedMaterial(null);
-          }}
-        >
+        <Modal visible={showEditModal} animationType="slide" transparent>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalHeader}>Update {selectedMaterial?.name}</Text>
+            <Text style={styles.modalHeader}>
+              Update {selectedMaterial?.name}
+            </Text>
             <TextInput
               style={styles.input}
               placeholder="Rate"
               keyboardType="numeric"
-              value={selectedMaterial?.rate?.toString()}
+              value={String(selectedMaterial?.rate || '')}
               onChangeText={(text) =>
                 setSelectedMaterial({ ...selectedMaterial, rate: text })
               }
@@ -172,13 +179,12 @@ const StockManagementScreen = () => {
               style={styles.input}
               placeholder="Quantity"
               keyboardType="numeric"
-              value={selectedMaterial?.quantity?.toString()}
+              value={String(selectedMaterial?.quantity || '')}
               onChangeText={(text) =>
                 setSelectedMaterial({ ...selectedMaterial, quantity: text })
               }
             />
             <View style={styles.modalButtons}>
-              <Button title="Update" onPress={handleUpdate} />
               <Button
                 title="Cancel"
                 color="red"
@@ -187,32 +193,35 @@ const StockManagementScreen = () => {
                   setSelectedMaterial(null);
                 }}
               />
+              <Button title="Update" onPress={handleUpdate} />
             </View>
           </View>
         </Modal>
       )}
-      <Toast />
     </View>
   );
 };
 
+export default StockManagementScreen;
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
+  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
   },
-  label: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 20,
+  searchBar: {
+    height: 45,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 15,
+    backgroundColor: '#f9f9f9',
   },
+  label: { fontSize: 18, fontWeight: 'bold', marginTop: 20 },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -229,55 +238,27 @@ const styles = StyleSheet.create({
     padding: 15,
     marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-  materialName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  infoContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 15,
-  },
-  infoText: {
-    fontSize: 16,
-    color: '#333',
-  },
+  materialName: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  infoContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
+  infoText: { fontSize: 16, color: '#333' },
   updateButton: {
     backgroundColor: '#007BFF',
     borderRadius: 5,
     paddingVertical: 10,
     alignItems: 'center',
   },
-  updateButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  updateButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff', // Solid white background
+    backgroundColor: '#fff',
     padding: 20,
   },
-  modalHeader: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    width: '100%',
-  },
+  modalHeader: { fontSize: 20, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+  modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, width: '100%' },
 });
-
-export default StockManagementScreen;
